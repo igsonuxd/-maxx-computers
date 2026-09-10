@@ -22,9 +22,10 @@ export const products = pgTable("products", {
   warranty: varchar("warranty", { length: 100 }).notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   stockQuantity: integer("stock_quantity").notNull().default(0),
-  images: jsonb("images").notNull().default([]), // array of strings
+  images: jsonb("images").notNull().default([]),
   description: text("description"),
   specifications: jsonb("specifications").notNull().default({}),
+  category: varchar("category", { length: 50 }).notNull().default("laptop"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -39,7 +40,7 @@ export const orders = pgTable("orders", {
   city: varchar("city", { length: 100 }).notNull(),
   pincode: varchar("pincode", { length: 20 }).notNull(),
   totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
-  status: varchar("status", { length: 50 }).notNull().default("Pending"), // Pending, Confirmed, Processing, Ready, Completed, Cancelled
+  status: varchar("status", { length: 50 }).notNull().default("Pending"),
   message: text("message"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -57,7 +58,7 @@ export const enquiries = pgTable("enquiries", {
   name: varchar("name", { length: 255 }).notNull(),
   phone: varchar("phone", { length: 50 }).notNull(),
   email: varchar("email", { length: 255 }),
-  type: varchar("type", { length: 50 }).notNull(), // GENERAL ENQUIRY, WHOLESALE ENQUIRY, BUY LAPTOP
+  type: varchar("type", { length: 50 }).notNull(),
   message: text("message").notNull(),
   status: varchar("status", { length: 50 }).notNull().default("Pending"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -75,7 +76,7 @@ export const serviceBookings = pgTable("service_bookings", {
   preferredDate: varchar("preferred_date", { length: 50 }),
   preferredTime: varchar("preferred_time", { length: 50 }),
   message: text("message"),
-  status: varchar("status", { length: 50 }).notNull().default("Pending"), // Pending, Confirmed, In Progress, Completed, Cancelled
+  status: varchar("status", { length: 50 }).notNull().default("Pending"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
