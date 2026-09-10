@@ -261,6 +261,15 @@ function inferCategory(name: string): "laptop" | "desktop" | "accessory" {
   return "laptop";
 }
 
+/** Normalize a product name for matching: collapse whitespace, trim, lowercase.
+    Keeps upserts idempotent even if rows were originally seeded with slightly
+    different casing/spacing than the current CATALOG names. */
+function normalizeName(name: string): string {
+  return (name || "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+const CATALOG_NAME_KEYS = new Set(CATALOG.map((c) => normalizeName(c.name)));
+
 export async function runSeed(db: any) {
   /* 1. Make the schema self-healing (idempotent DDL).
      Guarantees the `category` column exists even though no SQL migration
@@ -289,15 +298,24 @@ export async function runSeed(db: any) {
     });
   }
 
-  /* 3. Upsert every catalog item by unique name (idempotent).
-     - no row  -> insert
-     - rows    -> keep the lowest id canonical, update it, delete duplicates */
+  /* 3. Upsert every catalog item by (normalized) name (idempotent).
+     - no matching row -> insert
+     - matching row(s) -> keep the lowest id canonical, update it with the
+       current catalog values (including the current image paths), and remove
+       duplicate rows for that same name so re-seeding never accumulates rows.
+     Matching is case/whitespace-insensitive so rows created by an older seed
+     version still get synced to the current catalog. */
+  const allRows = await db.select().from(products).orderBy(asc(products.id));
+  const byName = new Map<string, any[]>();
+  for (const row of allRows) {
+    const key = normalizeName(row.name as string);
+    const list = byName.get(key) ?? [];
+    list.push(row);
+    byName.set(key, list);
+  }
+
   for (const item of CATALOG) {
-    const matches = await db
-      .select()
-      .from(products)
-      .where(eq(products.name, item.name))
-      .orderBy(asc(products.id));
+    const matches = byName.get(normalizeName(item.name)) ?? [];
 
     if (matches.length === 0) {
       await db.insert(products).values(item);
@@ -318,10 +336,12 @@ export async function runSeed(db: any) {
     }
   }
 
-  /* 4. Fix any remaining rows: replace placeholder/missing images and
-     assign a category to rows that lack a meaningful one. */
-  const allProducts = await db.select().from(products);
-  for (const p of allProducts) {
+  /* 4. Fix NON-catalog rows only (rows added outside the seed): replace
+     placeholder/missing images and assign a category when missing.
+     Catalog rows were already fully synced in step 3 and are left as-is. */
+  const freshRows = await db.select().from(products).orderBy(asc(products.id));
+  for (const p of freshRows) {
+    if (CATALOG_NAME_KEYS.has(normalizeName(p.name as string))) continue;
     const cat = (p.category as string | null) || "";
     const images = (p.images as string[]) || [];
     const needsImages = hasPlaceholder(images);
@@ -333,14 +353,41 @@ export async function runSeed(db: any) {
       .update(products)
       .set({
         images: needsImages ? FALLBACK_IMAGES[cat] ?? FALLBACK_IMAGES.laptop : images,
-        category: needsCategory ? inferCategory(p.name) : cat,
+        category: needsCategory ? inferCategory(p.name as string) : cat,
         updatedAt: new Date(),
       })
       .where(eq(products.id, p.id));
     fixed += 1;
   }
 
-  /* 5. Seed demo reviews only when the table is empty. */
+  /* 5. Verify: re-read the database and confirm every catalog product exists
+     with exactly the catalog's image paths. The /api/seed response reports
+     this so the operator can confirm all 24 products were synced. */
+  const verifyRows = await db.select().from(products).orderBy(asc(products.id));
+  const productReport: { name: string; id: number; firstImage: string; imageCount: number; ok: boolean }[] = [];
+  const unverified: { name: string; reason: string }[] = [];
+  for (const item of CATALOG) {
+    const matches = verifyRows.filter((r: any) => normalizeName(r.name as string) === normalizeName(item.name));
+    if (matches.length === 0) {
+      unverified.push({ name: item.name, reason: "row missing after upsert" });
+      continue;
+    }
+    const row = matches[0];
+    const images = (row.images as string[]) || [];
+    const ok = JSON.stringify(images) === JSON.stringify(item.images);
+    if (!ok) {
+      unverified.push({ name: item.name, reason: "images do not match catalog" });
+    }
+    productReport.push({
+      name: item.name,
+      id: row.id as number,
+      firstImage: images[0] ?? "",
+      imageCount: images.length,
+      ok,
+    });
+  }
+
+  /* 6. Seed demo reviews only when the table is empty. */
   const [existingReview] = await db.select().from(reviews).limit(1);
   if (!existingReview) {
     await db.insert(reviews).values([
@@ -350,5 +397,14 @@ export async function runSeed(db: any) {
     ]);
   }
 
-  return { inserted, updated, deduped, fixed };
+  return {
+    inserted,
+    updated,
+    deduped,
+    fixed,
+    catalogTotal: CATALOG.length,
+    verified: productReport.filter((p) => p.ok).length,
+    unverified,
+    products: productReport,
+  };
 }
