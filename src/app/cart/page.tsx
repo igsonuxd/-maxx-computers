@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCartStore } from "@/lib/store";
 import { Trash2, Plus, Minus, ArrowRight, ShoppingBag } from "lucide-react";
-import { useState } from "react";
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem } = useCartStore();
@@ -19,7 +18,7 @@ export default function CartPage() {
             <ShoppingBag className="w-10 h-10 text-zinc-300" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-black">Your cart is empty</h1>
-          <p className="text-zinc-500 text-lg">Looks like you haven't added anything yet.</p>
+          <p className="text-zinc-500 text-lg">Looks like you haven&apos;t added anything yet.</p>
           <Link href="/laptops" className="inline-flex bg-black text-white px-8 py-4 text-sm font-bold tracking-wide hover:bg-zinc-800 transition-colors">
             START SHOPPING
           </Link>

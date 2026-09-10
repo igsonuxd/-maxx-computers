@@ -127,7 +127,7 @@ export default function Home() {
             </h2>
 
             <p className="text-zinc-500">
-              Business-grade machines from the world's leading manufacturers.
+              Business-grade machines from the world&apos;s leading manufacturers.
             </p>
 
           </div>

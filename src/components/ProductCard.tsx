@@ -31,6 +31,7 @@ export default function ProductCard({ product }: { product: Product }) {
         href={`/laptops/${product.id}`}
         className="relative h-64 bg-zinc-50 flex items-center justify-center p-6 overflow-hidden"
       >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={
             product.images?.[0] ||
