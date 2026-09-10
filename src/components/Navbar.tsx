@@ -12,7 +12,9 @@ export default function Navbar() {
 
   const navLinks = [
     { name: "Home", href: "/" },
-    { name: "Laptops", href: "/laptops" },
+    { name: "Laptops", href: "/laptops?category=laptop" },
+    { name: "Desktops", href: "/laptops?category=desktop" },
+    { name: "Accessories", href: "/laptops?category=accessory" },
     { name: "Services", href: "/services" },
     { name: "Contact", href: "/contact" },
   ];
@@ -35,7 +37,7 @@ export default function Navbar() {
             ))}
           </div>
 
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-4 border-l border-zinc-200 pl-6 ml-2">
             <Link href="/cart" className="relative p-2 text-zinc-600 hover:text-black transition-colors">
               <ShoppingCart className="w-5 h-5" />
               {cartCount > 0 && (
@@ -66,7 +68,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden bg-white border-b border-zinc-100 shadow-xl absolute w-full">
           <div className="px-4 pt-2 pb-6 space-y-1">
