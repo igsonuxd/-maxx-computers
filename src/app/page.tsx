@@ -6,6 +6,8 @@ import {
   Wrench,
   Package,
   Laptop,
+  Monitor,
+  Headphones,
 } from "lucide-react";
 import Laptop3DWrapper from "@/components/Laptop3DWrapper";
 
@@ -115,8 +117,74 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SHOP BY BRAND */}
+      {/* SHOP BY CATEGORY */}
       <section className="py-24 bg-zinc-50">
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+          <div className="text-center mb-16">
+
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-black">
+              Shop By Category
+            </h2>
+
+            <p className="text-zinc-500">
+              Everything you need — wholesale laptops, desktops and accessories.
+            </p>
+
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+            <Link
+              href="/laptops?category=laptop"
+              className="group relative bg-white p-12 border border-zinc-100 flex flex-col items-center justify-center overflow-hidden hover:shadow-2xl transition-all duration-500"
+            >
+              <div className="absolute inset-0 bg-black translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+              <Laptop className="w-10 h-10 mb-4 text-black group-hover:text-white relative z-10 transition-colors duration-500" />
+              <h3 className="text-3xl font-black text-black group-hover:text-white relative z-10 transition-colors duration-500">
+                LAPTOPS
+              </h3>
+              <p className="mt-4 text-sm text-zinc-500 group-hover:text-zinc-400 relative z-10 transition-colors duration-500">
+                13 • From ₹12k
+              </p>
+            </Link>
+
+            <Link
+              href="/laptops?category=desktop"
+              className="group relative bg-white p-12 border border-zinc-100 flex flex-col items-center justify-center overflow-hidden hover:shadow-2xl transition-all duration-500"
+            >
+              <div className="absolute inset-0 bg-black translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+              <Monitor className="w-10 h-10 mb-4 text-black group-hover:text-white relative z-10 transition-colors duration-500" />
+              <h3 className="text-3xl font-black text-black group-hover:text-white relative z-10 transition-colors duration-500">
+                DESKTOPS
+              </h3>
+              <p className="mt-4 text-sm text-zinc-500 group-hover:text-zinc-400 relative z-10 transition-colors duration-500">
+                5 • From ₹7500
+              </p>
+            </Link>
+
+            <Link
+              href="/laptops?category=accessory"
+              className="group relative bg-white p-12 border border-zinc-100 flex flex-col items-center justify-center overflow-hidden hover:shadow-2xl transition-all duration-500"
+            >
+              <div className="absolute inset-0 bg-black translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+              <Headphones className="w-10 h-10 mb-4 text-black group-hover:text-white relative z-10 transition-colors duration-500" />
+              <h3 className="text-3xl font-black text-black group-hover:text-white relative z-10 transition-colors duration-500">
+                ACCESSORIES
+              </h3>
+              <p className="mt-4 text-sm text-zinc-500 group-hover:text-zinc-400 relative z-10 transition-colors duration-500">
+                6 • From ₹800
+              </p>
+            </Link>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* SHOP BY BRAND */}
+      <section className="py-24 bg-zinc-50 border-t border-zinc-100">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
