@@ -3,6 +3,8 @@ import { db } from "@/db";
 import { orders, orderItems, products } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();

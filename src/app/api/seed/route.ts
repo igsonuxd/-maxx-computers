@@ -3,6 +3,8 @@ import { db } from "@/db";
 import { products, reviews, users } from "@/db/schema";
 import bcryptjs from "bcryptjs";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     // Check if seeded

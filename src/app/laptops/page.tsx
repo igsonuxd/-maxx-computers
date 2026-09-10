@@ -2,6 +2,8 @@ import { db } from "@/db";
 import { products } from "@/db/schema";
 import ProductCard from "@/components/ProductCard";
 
+export const dynamic = "force-dynamic";
+
 export default async function LaptopsPage() {
   const allProducts = await db.select().from(products);
 

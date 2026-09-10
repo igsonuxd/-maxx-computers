@@ -51,7 +51,7 @@ export default function ContactPage() {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h1 className="text-4xl font-bold tracking-tight text-black mb-6">Contact Us</h1>
           <p className="text-zinc-500 text-lg">
-            Whether you're looking for a single laptop, bulk orders for your office, or need expert repairs, we're here to help.
+            Whether you&apos;re looking for a single laptop, bulk orders for your office, or need expert repairs, we&apos;re here to help.
           </p>
         </div>
 

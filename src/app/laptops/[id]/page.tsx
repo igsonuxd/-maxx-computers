@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import ProductActions from "./ProductActions";
 import ProductGallery from "./ProductGallery";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProductPage({
   params,
 }: {

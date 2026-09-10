@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -27,6 +27,10 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setHydrated(true); }, []);
 
   const subtotal = items.reduce((acc, item) => acc + Number(item.price) * item.quantity, 0);
 
@@ -60,6 +64,12 @@ export default function CheckoutPage() {
     }
   };
 
+  useEffect(() => {
+    if (hydrated && !isSuccess && items.length === 0) {
+      router.push("/cart");
+    }
+  }, [hydrated, items.length, isSuccess, router]);
+
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-zinc-50 flex items-center justify-center py-24 px-4">
@@ -77,8 +87,15 @@ export default function CheckoutPage() {
     );
   }
 
-  if (items.length === 0) {
-    router.push("/cart");
+  if (!hydrated) {
+    return (
+      <div className="min-h-screen bg-zinc-50 py-24 flex items-center justify-center">
+        <p className="text-zinc-500">Loading checkout...</p>
+      </div>
+    );
+  }
+
+  if (!isSuccess && items.length === 0) {
     return null;
   }
 
