@@ -419,6 +419,48 @@
   }
   .skip:focus { transform: none; }
 
+  /* ---------- Estimator (backend) ---------- */
+  [hidden] { display: none !important; }
+  .estimator { margin-top: clamp(28px, 5vh, 44px); padding: clamp(20px, 2.6vw, 32px); border-radius: 24px; }
+  .est-head h3 { font-size: clamp(1.7rem, 3vw, 2.5rem); margin: 12px 0 10px; }
+  .est-head p { max-width: 60ch; }
+  .est-notice {
+    display: inline-block; margin-top: 12px; padding: 6px 12px; border-radius: 999px;
+    font: 500 .64rem/1.3 var(--mono); letter-spacing: .14em; text-transform: uppercase;
+    border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent);
+  }
+  .est-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 18px; align-items: end; }
+  .est-form label {
+    display: flex; flex-direction: column; gap: 6px;
+    font: 500 .68rem/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase;
+  }
+  .est-form input {
+    width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 10px;
+    font: 400 .95rem var(--sans); letter-spacing: 0; text-transform: none; color: inherit;
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+  }
+  .est-form .btn { min-height: 44px; justify-content: center; cursor: pointer; font-family: var(--sans); }
+  .est-form .btn:disabled { opacity: .5; cursor: progress; }
+  .est-msg { min-height: 1.5em; margin: 12px 0 0; font-weight: 500; }
+  .est-msg.is-error { text-decoration: underline; text-underline-offset: 4px; }
+  .est-result { margin-top: 18px; display: grid; gap: 14px; }
+  .est-chart { width: 100%; height: auto; max-height: 260px; overflow: visible; }
+  .est-chart .axis { stroke: var(--ink); stroke-opacity: .25; stroke-width: 1; }
+  .est-line { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .est-area { fill: color-mix(in srgb, var(--ink) 9%, transparent); }
+  .est-peak { transition: opacity .5s var(--ease); }
+  .est-peak .core { fill: var(--amber); }
+  .est-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; }
+  .est-stats dt { font: 500 .64rem/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; opacity: .7; }
+  .est-stats dd { margin: 6px 0 0; font-family: var(--serif); font-size: clamp(1.4rem, 2.6vw, 2.1rem); line-height: 1.05; }
+  .est-stats dd.peak-val { color: var(--amber); }
+  .est-stats dd.text { font-family: var(--sans); font-size: 1rem; line-height: 1.4; }
+  .est-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: .85rem; }
+  .est-list li::before { content: "— "; opacity: .6; }
+  .est-disclaimer { font-size: .8rem; opacity: .72; max-width: none; }
+  @media (max-width: 640px) { .est-stats { grid-template-columns: 1fr; } }
+
   /* ---------- Responsive ---------- */
   @media (max-width: 1100px) {
     .split-2 { grid-template-columns: minmax(0, 1fr) minmax(0, 280px); }
@@ -647,6 +689,43 @@
           <p>Whole stations are removed from training before scoring. That is the closest test to a river it has never seen.</p>
         </article>
       </div>
+
+      <section class="estimator glass" aria-labelledby="estTitle" data-reveal>
+        <div class="est-head">
+          <p class="eyebrow" style="margin-bottom: 0">Try it · a river, gauged or not</p>
+          <h3 id="estTitle">Estimate daily flow for any location</h3>
+          <p class="small">Rainfall, temperature and soil moisture come from Open-Meteo. Catchment shape comes from StreamStats. Live results cover US locations.</p>
+          <span id="estNotice" class="est-notice" hidden>Synthetic demo data · not measurements</span>
+        </div>
+        <form id="estForm" class="est-form" novalidate>
+          <label for="estLat">Latitude<input id="estLat" name="latitude" type="number" inputmode="decimal" step="0.0001" min="-90" max="90" value="41.7658" required></label>
+          <label for="estLon">Longitude<input id="estLon" name="longitude" type="number" inputmode="decimal" step="0.0001" min="-180" max="180" value="-72.6734" required></label>
+          <label for="estRc">State code<input id="estRc" name="rcode" type="text" maxlength="2" pattern="[A-Za-z]{2}" placeholder="optional, e.g. CT"></label>
+          <label for="estStart">From<input id="estStart" name="start" type="date" value="2024-01-01" required></label>
+          <label for="estEnd">To<input id="estEnd" name="end" type="date" value="2024-12-31" required></label>
+          <button id="estBtn" class="btn btn-solid" type="submit">Estimate</button>
+        </form>
+        <p id="estMsg" class="est-msg small" role="status" aria-live="polite"></p>
+        <div id="estResult" class="est-result" hidden>
+          <svg id="estChart" class="est-chart" viewBox="0 0 640 220" role="img" aria-labelledby="estChartTitle">
+            <title id="estChartTitle">Estimated daily discharge in cubic feet per second</title>
+            <line class="axis" x1="0" y1="200" x2="640" y2="200"></line>
+            <path id="estArea" class="est-area" d=""></path>
+            <path id="estLine" class="est-line" d=""></path>
+            <g id="estPeak" class="est-peak" transform="translate(-50 -50)" style="opacity:0">
+              <circle class="halo" r="12"></circle>
+              <circle class="core" r="4.5"></circle>
+            </g>
+          </svg>
+          <dl class="est-stats">
+            <div><dt>Peak estimate</dt><dd id="estPeakVal" class="peak-val">–</dd></div>
+            <div><dt>Peak day</dt><dd id="estPeakDate">–</dd></div>
+            <div><dt>Inputs</dt><dd id="estSource" class="text">–</dd></div>
+          </dl>
+          <ul id="estWarnings" class="est-list"></ul>
+          <p id="estDisclaimer" class="est-disclaimer"></p>
+        </div>
+      </section>
     </div>
   </section>
 
@@ -700,7 +779,7 @@
           <dd class="note">Share of the variation in observed flow that the model explains. Closer to 1 is better.</dd>
         </div>
       </dl>
-      <p class="metrics-foot" data-reveal>Status: evaluation pending. Each value will be added only from held-out station results, with its split and date.</p>
+      <p id="metricsNote" class="metrics-foot" data-reveal>Status: evaluation pending. Each value will be added only from held-out station results, with its split and date.</p>
     </div>
   </section>
 
@@ -759,7 +838,7 @@
 
 <footer class="foot">
   <span>FLOODCAST · Predict the Surge Before It Strikes</span>
-  <span>Data: USGS · Open-Meteo · StreamStats</span>
+  <span id="apiStatus">Data: USGS · Open-Meteo · StreamStats</span>
 </footer>
 
 <div class="grain" aria-hidden="true"></div>
@@ -1019,6 +1098,150 @@
     });
   });
 
+  /* ---------- Backend: status, published metrics, live estimate ---------- */
+  function setText(id, text) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+
+  function errorText(body, status) {
+    var detail = body && body.detail;
+    if (typeof detail === 'string') return detail;
+    if (Array.isArray(detail) && detail.length) {
+      return detail.map(function (e) { return e.msg || 'Invalid value'; }).join(' · ');
+    }
+    return 'Request failed (' + status + ').';
+  }
+
+  function api(path, options) {
+    return fetch(path, options).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (body) {
+        if (!res.ok) throw new Error(errorText(body, res.status));
+        return body;
+      });
+    });
+  }
+
+  function loadStatus() {
+    api('api/status').then(function (s) {
+      var live = s.estimate_source === 'live';
+      var trained = !!(s.model && s.model.trained);
+      var when = trained && s.model.trained_at ? ' ' + s.model.trained_at.slice(0, 10) : '';
+      setText('apiStatus', live
+        ? 'Live data · model ' + (trained ? 'trained' + when : 'not trained yet')
+        : 'Demo mode · synthetic data, not measurements');
+      var notice = document.getElementById('estNotice');
+      if (notice) notice.hidden = live;
+    }).catch(function () {
+      setText('apiStatus', 'Backend offline · run python -m floodcast serve');
+    });
+  }
+
+  // Scores are shown only when the backend publishes them from live data. Otherwise TBD stays.
+  var METRIC_KEYS = { 'RMSE': 'rmse_cfs', 'Extreme-event RMSE': 'extreme_rmse_cfs', 'MAE': 'mae_cfs', 'R²': 'r2' };
+
+  function loadMetrics() {
+    api('api/metrics').then(function (m) {
+      if (m.status !== 'evaluated' || !m.values) return;
+      Array.prototype.forEach.call(document.querySelectorAll('.metric'), function (card) {
+        var key = METRIC_KEYS[card.querySelector('dt').textContent.trim()];
+        var value = key ? m.values[key] : null;
+        if (typeof value !== 'number') return;
+        var out = key === 'r2' ? value.toFixed(3) : (value >= 100 ? Math.round(value).toLocaleString() : value.toFixed(1));
+        var cell = card.querySelector('.value');
+        cell.textContent = out;
+        cell.style.opacity = '.92';
+      });
+      setText('metricsNote', 'Held-out stations · ' + m.n_stations + ' stations · ' + m.n_rows.toLocaleString() +
+        ' days · generated ' + String(m.generated_at).slice(0, 10) + '. Every score is out-of-fold.');
+    }).catch(function () { /* backend offline: keep TBD */ });
+  }
+
+  function estMsg(text, isError) {
+    var el = document.getElementById('estMsg');
+    if (!el) return;
+    el.textContent = text;
+    el.classList.toggle('is-error', !!isError);
+  }
+
+  function renderEstimate(r) {
+    var flows = r.estimated_cfs || [];
+    var dates = r.dates || [];
+    var n = flows.length;
+    var W = 640, H = 200, top = 12;
+    var max = 0;
+    flows.forEach(function (v) { if (typeof v === 'number' && v > max) max = v; });
+    function x(i) { return n > 1 ? (i / (n - 1)) * W : W / 2; }
+    function y(v) { return H - (max > 0 ? (v / max) * (H - top) : 0); }
+
+    var pts = [];
+    flows.forEach(function (v, i) { if (typeof v === 'number') pts.push([x(i), y(v)]); });
+    var line = '', area = '';
+    if (pts.length) {
+      line = pts.map(function (p, k) { return (k ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join('');
+      area = line + 'L' + pts[pts.length - 1][0].toFixed(1) + ' ' + H + 'L' + pts[0][0].toFixed(1) + ' ' + H + 'Z';
+    }
+    setText('estPeakVal', r.peak ? Math.round(r.peak.cfs).toLocaleString() + ' cfs' : '–');
+    setText('estPeakDate', r.peak ? r.peak.date : '–');
+    setText('estSource', r.data_source === 'live' ? 'USGS, Open-Meteo, StreamStats' : 'Synthetic demo data');
+    setText('estDisclaimer', r.disclaimer || '');
+    document.getElementById('estLine').setAttribute('d', line);
+    document.getElementById('estArea').setAttribute('d', area);
+
+    var peakG = document.getElementById('estPeak');
+    var at = r.peak ? dates.indexOf(r.peak.date) : -1;
+    if (at >= 0 && typeof flows[at] === 'number') {
+      peakG.setAttribute('transform', 'translate(' + x(at).toFixed(1) + ' ' + y(flows[at]).toFixed(1) + ')');
+      peakG.style.opacity = '1';
+    } else {
+      peakG.style.opacity = '0';
+    }
+
+    var list = document.getElementById('estWarnings');
+    list.textContent = '';
+    (r.warnings || []).forEach(function (w) {
+      var li = document.createElement('li');
+      li.textContent = w;
+      list.appendChild(li);
+    });
+    document.getElementById('estResult').hidden = false;
+    estMsg('Estimate ready: ' + n + ' days.', false);
+  }
+
+  function initEstimator() {
+    var form = document.getElementById('estForm');
+    if (!form) return;
+    var btn = document.getElementById('estBtn');
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var f = form.elements;
+      var lat = parseFloat(f.latitude.value);
+      var lon = parseFloat(f.longitude.value);
+      var start = f.start.value;
+      var end = f.end.value;
+      var rc = (f.rcode.value || '').trim();
+      if (!isFinite(lat) || lat < -90 || lat > 90 || !isFinite(lon) || lon < -180 || lon > 180) {
+        estMsg('Enter a latitude from -90 to 90 and a longitude from -180 to 180.', true);
+        return;
+      }
+      if (!start || !end || end < start) {
+        estMsg('Choose a start date on or before the end date.', true);
+        return;
+      }
+      var body = { latitude: lat, longitude: lon, start: start, end: end };
+      if (rc) body.rcode = rc.toUpperCase();
+      btn.disabled = true;
+      estMsg('Estimating: fetching rainfall, soil and catchment data…', false);
+      api('api/estimate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      }).then(renderEstimate).catch(function (err) {
+        estMsg(err.message || 'The estimate failed.', true);
+      }).then(function () { btn.disabled = false; });
+    });
+  }
+
   /* ---------- Wiring ---------- */
   window.addEventListener('scroll', schedule, { passive: true });
   window.addEventListener('resize', measure);
@@ -1037,6 +1260,10 @@
   }
   if (reduceMQ.addEventListener) reduceMQ.addEventListener('change', onMotionChange);
   else if (reduceMQ.addListener) reduceMQ.addListener(onMotionChange);
+
+  initEstimator();
+  loadStatus();
+  loadMetrics();
 
   buildHydro();
   measure();

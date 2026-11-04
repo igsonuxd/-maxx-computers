@@ -1,0 +1,6 @@
+# Generated artifacts: datasets, cached upstream responses, trained models, the SQLite audit log
+backend/data/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
