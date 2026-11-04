@@ -15,6 +15,7 @@ export default function Navbar() {
     { name: "Laptops", href: "/laptops" },
     { name: "Services", href: "/services" },
     { name: "Contact", href: "/contact" },
+    { name: "🌊 Floodcast", href: "/floodcast" },
   ];
 
   return (

@@ -1,0 +1,6 @@
+station_id,name,river,state,lat,lon,DRNAREA,ELEV,FOREST,SLOPE_PCT,IMPERVIOUS
+01646500,"Potomac River near Washington, DC (Little Falls)",Potomac River,DC/MD,38.9494,-77.1272,11560,1050,58,12.5,4.5
+07010000,"Mississippi River at St. Louis, MO",Mississippi River,MO,38.6289,-90.1803,701000,1050,22,3.2,2.0
+08158000,"Colorado River at Austin, TX",Colorado River (TX),TX,30.2825,-97.7178,27250,1200,18,5.5,3.5
+02087500,"Neuse River near Clayton, NC",Neuse River,NC,35.6464,-78.4044,1150,350,42,3.8,6.0
+11447650,"Sacramento River at Verona, CA",Sacramento River,CA,38.7744,-121.5969,21200,1500,38,14.0,1.8

@@ -8,3 +8,7 @@ node_modules/
 drizzle/
 *.log
 Windows.iso
+
+__pycache__/
+*.pyc
+tsconfig.tsbuildinfo

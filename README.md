@@ -166,3 +166,14 @@ Migrations use:
 - **SSL errors**: Ensure URL ends with `?sslmode=require` for Neon; the pool forces SSL otherwise.
 - **Seed returns `Already seeded`**: DB already has products. To reseed, truncate `products` table.
 - **Admin not logging in**: Default password is `admin123` (hashed via bcrypt on seed). Clear cookies if stuck.
+---
+
+## 🌊 FLOODCAST (hackathon platform — added 2026-11-04)
+
+AI-powered flood prediction, early warning & emergency SOS at **`/floodcast`** (Maxx Computers pages unchanged).
+
+- **Official ML solution:** `floodcast/ml/solution.py` → `floodcast/outputs/predictions.csv` (RMSE/Extreme-RMSE/MAE/R² + NSE/KGE; LOSO validation)
+- **Start here:** `floodcast/README.md` · requirements traceability: `floodcast/REQUIREMENTS.md` · model card: `floodcast/model_card.md`
+- **Run ML:** `cd floodcast && pip install -r requirements.txt && python ml/solution.py` (official CSVs → `floodcast/data/official/`)
+- **Web:** live USGS (param 00060) + Open-Meteo in-browser, 7-day ML forecasts, risk map, alerts, SOS + rescue triage (`/api/floodcast/*`, Postgres `fc_*` tables with memory fallback — run `npm run db:push` after setting `DATABASE_URL`)
+

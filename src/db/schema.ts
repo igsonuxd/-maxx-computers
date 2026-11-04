@@ -79,6 +79,55 @@ export const serviceBookings = pgTable("service_bookings", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+/* ---------------- FLOODCAST (additive — Maxx Computers tables untouched) --------------- */
+
+export const fcSosRequests = pgTable("fc_sos_requests", {
+  id: serial("id").primaryKey(),
+  publicId: varchar("public_id", { length: 32 }).notNull().unique(),
+  name: varchar("name", { length: 255 }).notNull(),
+  phone: varchar("phone", { length: 50 }).notNull(),
+  peopleCount: integer("people_count").notNull().default(1),
+  address: text("address"),
+  lat: decimal("lat", { precision: 10, scale: 6 }),
+  lon: decimal("lon", { precision: 10, scale: 6 }),
+  waterLevel: varchar("water_level", { length: 50 }).notNull().default("ANKLE"),
+  needs: jsonb("needs").notNull().default([]), // string[]
+  medical: boolean("medical").notNull().default(false),
+  message: text("message"),
+  stationId: varchar("station_id", { length: 16 }),
+  stationName: varchar("station_name", { length: 255 }),
+  distanceKm: decimal("distance_km", { precision: 10, scale: 2 }),
+  riskLevel: varchar("risk_level", { length: 20 }).notNull().default("NORMAL"),
+  predictedCfs: decimal("predicted_cfs", { precision: 14, scale: 2 }),
+  priorityScore: integer("priority_score").notNull().default(0),
+  priorityLabel: varchar("priority_label", { length: 20 }).notNull().default("LOW"),
+  status: varchar("status", { length: 20 }).notNull().default("NEW"), // NEW ACKNOWLEDGED DISPATCHED RESCUED CLOSED
+  rescuerNote: text("rescuer_note"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const fcAlertSubscriptions = pgTable("fc_alert_subscriptions", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  contact: varchar("contact", { length: 255 }).notNull(),
+  channel: varchar("channel", { length: 20 }).notNull().default("SMS"),
+  stationId: varchar("station_id", { length: 16 }).notNull(),
+  thresholdLevel: varchar("threshold_level", { length: 20 }).notNull().default("WARNING"),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const fcScenarioLogs = pgTable("fc_scenario_logs", {
+  id: serial("id").primaryKey(),
+  stationId: varchar("station_id", { length: 16 }).notNull(),
+  kind: varchar("kind", { length: 30 }).notNull().default("scenario"),
+  inputs: jsonb("inputs").notNull().default({}),
+  peakCfs: decimal("peak_cfs", { precision: 14, scale: 2 }),
+  riskLevel: varchar("risk_level", { length: 20 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const reviews = pgTable("reviews", {
   id: serial("id").primaryKey(),
   customerName: varchar("customer_name", { length: 255 }).notNull(),
